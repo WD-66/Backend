@@ -1,5 +1,11 @@
 import { Schema, model, type ValidatorProps } from 'mongoose';
 
+const addressSchema = new Schema({
+  street: String,
+  houseNumber: String,
+  city: String,
+});
+
 const userSchema = new Schema(
   {
     firstName: {
@@ -21,6 +27,11 @@ const userSchema = new Schema(
     age: {
       type: Number,
       min: 0,
+      default: 10,
+    },
+    address: {
+      type: addressSchema,
+      default: { street: '', city: 'Berlin', houseNumber: '' },
     },
   },
   { timestamps: true } //Adds createdAt and updatedAt fields

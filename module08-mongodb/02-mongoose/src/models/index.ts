@@ -1,3 +1,4 @@
 import User from './User.ts';
+import Post from './Post.ts';
 
-export { User };
+export { User, Post };
