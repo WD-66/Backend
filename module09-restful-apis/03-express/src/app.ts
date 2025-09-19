@@ -1,23 +1,15 @@
 import express from 'express';
 import '#db';
-import {
-  getAllDucks,
-  getDuckById,
-  createDuck,
-  updateDuck,
-  deleteDuck,
-} from '#controllers';
+import { duckRouter } from '#routers';
 
 const app = express();
 const port = 3000;
 
 app.use(express.json()); //Middleware
 
-app.get('/ducks', getAllDucks);
-app.get('/ducks/:id', getDuckById);
-app.post('/ducks', createDuck);
-app.put('/ducks', updateDuck);
-app.delete('/ducks', deleteDuck);
+app.use('/ducks', duckRouter);
+
+// app.use('/users', userRouter)
 
 app.listen(port, () =>
   console.log('Server is running on http://localhost:3000')

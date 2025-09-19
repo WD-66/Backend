@@ -2,6 +2,12 @@ import type { RequestHandler } from 'express';
 import { isValidObjectId } from 'mongoose';
 import { Duck } from '#models';
 
+type Duck = {
+  name: string;
+  imgUrl: string;
+  quote: string;
+};
+
 export const getAllDucks: RequestHandler = async (req, res) => {
   try {
     const allDucks = await Duck.find();
@@ -15,7 +21,7 @@ export const getAllDucks: RequestHandler = async (req, res) => {
   }
 };
 
-export const createDuck: RequestHandler = async (req, res) => {
+export const createDuck: RequestHandler<{}, {}, Duck> = async (req, res) => {
   try {
     const { name, imgUrl, quote } = req.body;
 
@@ -35,7 +41,7 @@ export const createDuck: RequestHandler = async (req, res) => {
   }
 };
 
-export const getDuckById: RequestHandler = async (req, res) => {
+export const getDuckById: RequestHandler<{ id: string }> = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -57,7 +63,10 @@ export const getDuckById: RequestHandler = async (req, res) => {
   }
 };
 
-export const updateDuck: RequestHandler = async (req, res) => {
+export const updateDuck: RequestHandler<{ id: string }, {}, Duck> = async (
+  req,
+  res
+) => {
   try {
     if (!req.body) return res.status(400).json({ error: 'Missing fields' });
     const { name, imgUrl, quote } = req.body;
@@ -92,7 +101,7 @@ export const updateDuck: RequestHandler = async (req, res) => {
   }
 };
 
-export const deleteDuck: RequestHandler = async (req, res) => {
+export const deleteDuck: RequestHandler<{ id: string }> = async (req, res) => {
   try {
     const { id } = req.params;
     if (!isValidObjectId(id))

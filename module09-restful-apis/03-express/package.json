@@ -16,6 +16,10 @@
     "#controllers": {
       "development": "./src/controllers/index.ts",
       "default": "./dist/controllers/index.js"
+    },
+    "#routers": {
+      "development": "./src/routers/index.ts",
+      "default": "./dist/routers/index.js"
     }
   },
   "scripts": {
