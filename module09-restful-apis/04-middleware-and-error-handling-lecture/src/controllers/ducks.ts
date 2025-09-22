@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { isValidObjectId } from 'mongoose';
+import { isValidObjectId, type ObjectId } from 'mongoose';
 import { Duck } from '#models';
 
 type DuckType = {
@@ -12,132 +12,91 @@ type DuckType = {
 type UpdateDuckType = Omit<DuckType, 'owner'>;
 
 const getAllDucks: RequestHandler = async (req, res) => {
-	try {
-		const ducks = await Duck.find().lean();
+	const ducks = await Duck.find();
 
-		res.json(ducks);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
+	res.json(ducks);
 };
 const createDuck: RequestHandler<{}, {}, DuckType> = async (req, res) => {
-	try {
-		if (!req.body)
-			return res
-				.status(400)
-				.json({ error: 'Name, image URL, owner, and quote are required' });
+	if (!req.body)
+		throw new Error('Name, image URL, and quote are required', {
+			cause: { status: 400 }
+		});
 
-		const { name, imgUrl, quote, owner } = req.body;
+	const { name, imgUrl, quote, owner } = req.body;
 
-		if (!name || !imgUrl || !quote || !owner) {
-			return res
-				.status(400)
-				.json({ error: 'Name, image URL, owner, and quote are required' });
-		}
-
-		const newDuck = await Duck.create<DuckType>({ name, imgUrl, quote, owner });
-
-		res.json(newDuck);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
+	if (!name || !imgUrl || !quote || !owner) {
+		throw new Error('Name, image URL, and quote are required', {
+			cause: { status: 400 }
+		});
 	}
+
+	const newDuck = await Duck.create<DuckType>({ name, imgUrl, quote, owner });
+
+	res.json(newDuck);
 };
 const getDuckById: RequestHandler<{ id: string }> = async (req, res) => {
-	try {
-		const { id } = req.params;
+	const { id } = req.params;
 
-		if (!isValidObjectId(id))
-			return res.status(400).json({ error: 'Invalid ID' });
+	if (!isValidObjectId(id))
+		throw new Error('Invalid ID', { cause: { status: 400 } });
 
-		const duck = await Duck.findById(id).lean();
+	const duck = await Duck.findById(id);
 
-		if (!duck) return res.status(404).json({ error: 'Duck Not Found' });
+	if (!duck) throw new Error('Duck Not Found', { cause: { status: 404 } });
 
-		res.json(duck);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
+	res.json(duck);
 };
 const updateDuck: RequestHandler<{ id: string }, {}, UpdateDuckType> = async (
 	req,
 	res
 ) => {
-	try {
-		if (!req.body)
-			return res
-				.status(400)
-				.json({ error: 'Name, image URL, owner, and quote are required' });
-		const { name, imgUrl, quote } = req.body;
-		const { id } = req.params;
-		const { userId } = req;
-		console.log(userId);
-
-		if (!name || !imgUrl || !quote) {
-			return res
-				.status(400)
-				.json({ error: 'Name, image URL, and quote are required' });
-		}
-
-		if (!isValidObjectId(id))
-			return res.status(400).json({ error: 'Invalid ID' });
-
-		const duck = await Duck.findById(id);
-
-		if (!duck) return res.status(404).json({ error: 'Duck Not Found' });
-
-		console.log(duck.owner);
-
-		if (userId !== duck.owner.toString()) {
-			return res
-				.status(403)
-				.json({ message: 'You are not authorized to update this duck' });
-		}
-
-		duck.name = name;
-		duck.imgUrl = imgUrl;
-		duck.quote = quote;
-
-		await duck.save();
-
-		res.json(duck);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
+	if (!req.body) {
+		throw new Error('Name, image URL, and quote are required', {
+			cause: { status: 400 }
+		});
 	}
+	const { name, imgUrl, quote } = req.body;
+	const { id } = req.params;
+	const { userId } = req;
+
+	// console.log(userId);
+
+	if (!name || !imgUrl || !quote) {
+		throw new Error('Name, image URL, and quote are required', {
+			cause: { status: 400 }
+		});
+	}
+
+	if (!isValidObjectId(id))
+		throw new Error('Invalid ID', { cause: { status: 400 } });
+
+	const duck = await Duck.findById(id);
+
+	if (!duck) throw new Error('Duck Not Found', { cause: { status: 404 } });
+
+	// console.log(duck.owner);
+	if (userId !== duck.owner.toString())
+		throw new Error('You are not authorized to update this duck', {
+			cause: { status: 403 }
+		});
+
+	duck.name = name;
+	duck.imgUrl = imgUrl;
+	duck.quote = quote;
+
+	await duck.save();
+	res.json(duck);
 };
 const deleteDuck: RequestHandler<{ id: string }> = async (req, res) => {
-	try {
-		const { id } = req.params;
-		if (!isValidObjectId(id))
-			return res.status(400).json({ error: 'Invalid ID' });
+	const { id } = req.params;
+	if (!isValidObjectId(id))
+		throw new Error('Invalid ID', { cause: { status: 400 } });
 
-		const found = await Duck.findByIdAndDelete(id);
+	const found = await Duck.findByIdAndDelete(id);
 
-		if (!found) return res.status(404).json({ error: 'Duck Not Found' });
+	if (!found) throw new Error('Duck Not Found', { cause: { status: 404 } });
 
-		res.json({ message: 'Duck deleted' });
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
+	res.json({ message: 'Duck deleted' });
 };
 
 export { getAllDucks, createDuck, getDuckById, updateDuck, deleteDuck };
