@@ -9,13 +9,15 @@ const postInputSchema = z.strictObject({
   userId: z.string().refine(val => isValidObjectId(val), 'Invalid User ID')
 });
 
+const populatedUserSchema = z.object({
+  ...userInputSchema.omit({ password: true, isActive: true }).shape,
+  _id: z.instanceof(Types.ObjectId)
+});
+
 const postSchema = z.strictObject({
   ...postInputSchema.shape,
   ...dbEntrySchema.shape,
-  userId: z.object({
-    _id: z.instanceof(Types.ObjectId),
-    ...userInputSchema.shape
-  })
+  userId: populatedUserSchema
 });
 
-export { postInputSchema, postSchema };
+export { postInputSchema, postSchema, populatedUserSchema };
