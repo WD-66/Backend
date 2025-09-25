@@ -17,7 +17,7 @@ const paramsSchema = z.strictObject({
 });
 
 const querySchema = z.strictObject({
-	owner: stringIdSchema
+	owner: stringIdSchema.optional()
 });
 
 export { stringIdSchema, dbEntrySchema, paramsSchema, querySchema };

@@ -18,7 +18,7 @@ const validateZod = (
 			next(new Error(z.prettifyError(error), { cause: { status: 400 } }));
 		} else {
 			if (property === 'query') {
-				req.sanitizedQuery = data as { owner: string };
+				req.sanitizedQuery = data;
 			} else {
 				req[property] = data;
 			}
