@@ -12,4 +12,12 @@ const dbEntrySchema = z.strictObject({
 	__v: z.int().nonnegative()
 });
 
-export { stringIdSchema, dbEntrySchema };
+const paramsSchema = z.strictObject({
+	id: stringIdSchema
+});
+
+const querySchema = z.strictObject({
+	owner: stringIdSchema
+});
+
+export { stringIdSchema, dbEntrySchema, paramsSchema, querySchema };

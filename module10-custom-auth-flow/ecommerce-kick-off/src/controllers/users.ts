@@ -32,8 +32,6 @@ const getUserById: RequestHandler<{ id: string }, UserDTO> = async (
 	const {
 		params: { id }
 	} = req;
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 
 	const user = await User.findById(id);
 	if (!user) throw new Error('User not found', { cause: { status: 404 } });
@@ -51,8 +49,6 @@ const updateUser: RequestHandler<
 	} = req;
 	const { firstName, lastName, email } = body;
 
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 	const user = await User.findById(id);
 
 	if (!user) throw new Error('User not found', { cause: { status: 404 } });
@@ -71,8 +67,6 @@ const deleteUser: RequestHandler<{ id: string }, { message: string }> = async (
 	const {
 		params: { id }
 	} = req;
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 
 	const user = await User.findByIdAndDelete(id);
 

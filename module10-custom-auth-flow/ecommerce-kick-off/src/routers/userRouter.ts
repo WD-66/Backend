@@ -6,19 +6,21 @@ import {
 	updateUser,
 	deleteUser
 } from '#controllers';
-import { validateBody } from '#middleware';
-import { userInputSchema } from '#schemas';
+import { validateZod } from '#middleware';
+import { userInputSchema, paramsSchema } from '#schemas';
 
 const userRouter = Router();
 
 userRouter
 	.route('/')
 	.get(getUsers)
-	.post(validateBody(userInputSchema), createUser);
+	.post(validateZod(userInputSchema, 'body'), createUser);
+
+userRouter.use('/:id', validateZod(paramsSchema, 'params'));
 userRouter
 	.route('/:id')
 	.get(getUserById)
-	.put(validateBody(userInputSchema), updateUser)
+	.put(validateZod(userInputSchema, 'body'), updateUser)
 	.delete(deleteUser);
 
 export default userRouter;

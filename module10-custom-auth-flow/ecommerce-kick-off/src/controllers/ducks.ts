@@ -18,10 +18,25 @@ type PopulatedUserDTO = z.infer<typeof populatedUserSchema>;
 type DuckDTO = z.infer<typeof duckSchema>;
 
 const getAllDucks: RequestHandler<{}, DuckDTO[]> = async (req, res) => {
-	console.log(req.query);
-	const ducks = await Duck.find()
-		.populate<{ owner: PopulatedUserDTO }>('owner', 'firstName lastName email')
-		.lean();
+	// console.log(req.query);
+	const owner = req.sanitizedQuery?.owner;
+	let ducks: DuckDTO[];
+
+	if (owner) {
+		ducks = await Duck.find({ owner })
+			.populate<{ owner: PopulatedUserDTO }>(
+				'owner',
+				'firstName lastName email'
+			)
+			.lean();
+	} else {
+		ducks = await Duck.find()
+			.populate<{ owner: PopulatedUserDTO }>(
+				'owner',
+				'firstName lastName email'
+			)
+			.lean();
+	}
 
 	res.json(ducks);
 };
@@ -42,10 +57,8 @@ const getDuckById: RequestHandler<{ id: string }, DuckDTO> = async (
 	req,
 	res
 ) => {
+	console.log(req.params);
 	const { id } = req.params;
-
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 
 	const duck = await Duck.findById(id).populate<{ owner: PopulatedUserDTO }>(
 		'owner',
@@ -63,19 +76,10 @@ const updateDuck: RequestHandler<
 > = async (req, res) => {
 	const { name, imgUrl, quote } = req.body;
 	const { id } = req.params;
-	const { userId } = req;
-
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 
 	const duck = await Duck.findById(id);
 
 	if (!duck) throw new Error('Duck Not Found', { cause: { status: 404 } });
-
-	if (userId !== duck.owner.toString())
-		throw new Error('You are not authorized to update this duck', {
-			cause: { status: 403 }
-		});
 
 	duck.name = name;
 	duck.imgUrl = imgUrl;
@@ -94,8 +98,6 @@ const deleteDuck: RequestHandler<{ id: string }, { message: string }> = async (
 	res
 ) => {
 	const { id } = req.params;
-	if (!isValidObjectId(id))
-		throw new Error('Invalid ID', { cause: { status: 400 } });
 
 	const found = await Duck.findByIdAndDelete(id);
 

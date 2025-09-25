@@ -4,19 +4,14 @@ import { duckRouter, userRouter } from '#routers';
 import { errorHandler } from '#middleware';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use((req, res, next) => {
-	console.log('Time: ', Date.now());
-	next();
-});
 
-app.get('/', (req, res) => {
-	throw new Error('Look, an error!');
-});
 app.use('/ducks', duckRouter);
+
 app.use('/users', userRouter);
+
 app.use('*splat', (req, res) => {
 	throw new Error('Not found', { cause: { status: 404 } });
 });

@@ -6,19 +6,25 @@ import {
 	updateDuck,
 	deleteDuck
 } from '#controllers';
-import { validateBody } from '#middleware';
-import { duckInputSchema, duckUpdateInputSchema } from '#schemas';
+import { validateZod } from '#middleware';
+import {
+	duckInputSchema,
+	duckUpdateInputSchema,
+	paramsSchema,
+	querySchema
+} from '#schemas';
 const duckRouter = Router();
 
 duckRouter
 	.route('/')
-	.get(getAllDucks)
-	.post(validateBody(duckInputSchema), createDuck);
+	.get(validateZod(querySchema, 'query'), getAllDucks)
+	.post(validateZod(duckInputSchema, 'body'), createDuck);
 
+duckRouter.use('/:id', validateZod(paramsSchema, 'params'));
 duckRouter
 	.route('/:id')
 	.get(getDuckById)
-	.put(validateBody(duckUpdateInputSchema), updateDuck)
+	.put(validateZod(duckUpdateInputSchema, 'body'), updateDuck)
 	.delete(deleteDuck);
 
 export default duckRouter;
