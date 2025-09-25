@@ -38,8 +38,7 @@
 		"dev": "node --env-file=.env.development.local --watch --conditions development src/app.ts",
 		"prebuild": "rm -rf dist",
 		"build": "tsc",
-		"prestart": "npm run build",
-		"start": "node --env-file=.env dist/app.js"
+		"start": "node --env-file=.env.production.local dist/app.js"
 	},
 	"keywords": [],
 	"author": "",
