@@ -46,7 +46,7 @@ declare global {
 
 	type Message = {
 		role: MsgRoles;
-		content: string;
+		content: string | null;
 		_id: string;
 	};
 

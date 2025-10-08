@@ -59,4 +59,34 @@ const getChatHistory = async (chatId: string | null): Promise<HistoryRes> => {
 	return data;
 };
 
-export { createChat, getChatHistory, fetchChat };
+const fetchPersonalChat = async (body: ChatBody): Promise<Response> => {
+	const response = await fetch(`${baseURL}/agent`, {
+		method: 'POST',
+		body: JSON.stringify(body),
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	});
+
+	if (!response.ok) {
+		const { message } = await response.json();
+		throw new Error(message || 'Something went wrong');
+	}
+	return response;
+};
+
+const createPersonalChat = async (body: ChatBody): Promise<ChatRes> => {
+	const response = await fetchPersonalChat(body);
+
+	const data = (await response.json()) as ChatRes;
+
+	return data;
+};
+
+export {
+	createChat,
+	getChatHistory,
+	fetchChat,
+	fetchPersonalChat,
+	createPersonalChat
+};

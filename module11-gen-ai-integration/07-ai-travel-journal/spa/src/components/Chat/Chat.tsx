@@ -6,7 +6,7 @@ type ChatProps = {
 };
 const Chat = ({ messages, chatRef }: ChatProps) => {
 	const chatMessages = messages.filter(
-		(msg) => msg.role === 'assistant' || msg.role === 'user'
+		(msg) => (msg.role === 'assistant' && msg.content) || msg.role === 'user'
 	);
 	return (
 		<div

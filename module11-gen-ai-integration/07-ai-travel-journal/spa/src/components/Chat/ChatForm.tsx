@@ -5,8 +5,14 @@ import {
 } from 'react';
 import { toast } from 'react-toastify';
 
-import { createChat, fetchChat } from '@/data';
+import {
+	createChat,
+	fetchChat,
+	createPersonalChat,
+	fetchPersonalChat
+} from '@/data';
 import { addOrUpdateMsg } from '@/utils';
+import { useAuth } from '@/context';
 
 type FormProps = {
 	setMessages: SetMessages;
@@ -15,6 +21,7 @@ type FormProps = {
 };
 
 const Form = ({ setMessages, setChatId, chatId }: FormProps) => {
+	const { signedIn } = useAuth();
 	const [prompt, setPrompt] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [isStream, setIsStream] = useState(false);
@@ -47,7 +54,9 @@ const Form = ({ setMessages, setChatId, chatId }: FormProps) => {
 
 			if (isStream) {
 				// process the stream
-				const res = await fetchChat({ prompt, chatId, stream: isStream });
+				const res = await (signedIn
+					? fetchPersonalChat({ prompt, chatId, stream: isStream })
+					: fetchChat({ prompt, chatId, stream: isStream }));
 				const reader = res.body!.getReader();
 				const decoder = new TextDecoder();
 
@@ -83,7 +92,9 @@ const Form = ({ setMessages, setChatId, chatId }: FormProps) => {
 				}
 			} else {
 				// pass chatId to createChat
-				const response = await createChat({ prompt, chatId, stream: isStream });
+				const response = await (signedIn
+					? createPersonalChat({ prompt, chatId, stream: isStream })
+					: createChat({ prompt, chatId, stream: isStream }));
 				// console.log(response);
 				asstMsg.content = response.completion;
 				setMessages((prev) => [...prev, asstMsg]);
