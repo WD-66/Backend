@@ -225,13 +225,32 @@ export const createPersonalizedChatCompletion: RequestHandler<
     // if no tool calls were made, the initial prompt
     // was able to give the response, so we send the response, and have an early return
   } else {
-    res.json({
-      completion:
-        checkIntentCompletionMessage?.content ||
-        'Sorry, something went wrong. Please repeat the question',
-      chatId: currentChat._id.toString()
-    });
-    return;
+    const msgContent =
+      checkIntentCompletionMessage?.content ||
+      'Sorry, something went wrong. Please repeat the question';
+    if (stream) {
+      res.writeHead(200, {
+        Connection: 'keep-alive',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream'
+      });
+
+      res.write(`data: ${JSON.stringify({ text: msgContent })}\n\n`);
+      res.write(`data: ${JSON.stringify({ chatId: currentChat._id })}\n\n`);
+      res.end();
+      res.on('close', async () => {
+        await currentChat.save();
+        res.end();
+      });
+      return;
+    } else {
+      await currentChat.save();
+      res.json({
+        completion: msgContent,
+        chatId: currentChat._id.toString()
+      });
+      return;
+    }
   }
 
   // from here, things look the same as before, since we are not using structured output
